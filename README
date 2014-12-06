@@ -1,0 +1,19 @@
+This is a distribution of mp_suggest, an organization tool for MP3 libraries
+
+* Licensing
+
+  This program is released under the terms of the GNU General Public
+  License (GNU GPL).  
+
+  You can find a copy of the license in the file COPYING.
+
+* Using:
+
+  mp_suggest comes with a complete list of commands that can be seen by
+  running the command with no arguments.  See the man page that comes
+  with it.
+
+* To do:
+
+  The TODO file is empty for a reason. This was mostly an exercise in 
+  writing Hy.

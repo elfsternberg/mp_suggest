@@ -1,0 +1,166 @@
+\documentclass[english]{article}
+\usepackage[latin1]{inputenc}
+\usepackage{babel}
+
+\IfFileExists{fancyhdr.sty}{
+\usepackage[fancyhdr,pdf]{latex2man}
+}{
+
+\IfFileExists{fancyheadings.sty}{
+\usepackage[fancy,pdf]{latex2man}
+}{
+\usepackage[nofancy,pdf]{latex2man}
+\message{no fancyhdr or fancyheadings package present, discard it}
+}}
+
+\setVersionWord{Version:}
+\setVersion{0.1a}
+
+\begin{document}
+
+\begin{Name}{1}{mp\_suggest}{Elf M. Sternberg}{Utilities}{mp\_suggest \\--\\ MP3 Encoding Suggestions}
+
+  \Prog{mp\_suggest} is a tool to compare your existing MP3 files to
+  their ID3 entries and suggest possible new entries.
+
+\end{Name}
+
+\section{Synopsis}
+%%%%%%%%%%%%%%%%%%
+
+\Prog{fcc} \OptArg{-class }{list of class names}
+                \OptArg{-author }{author's name}
+                \oOptArg{-namespace }{namespace_name}
+                \oOpt{-overwrite}
+                \oOpt{-verbose}
+                \oOpt{-no_unit_test}
+                \oOpt{-no_makefile}
+                \oOptArg{-project }{project_name}
+                \oOpt{-sccs_keywords}
+                \oOpt{-continuus_keywords}
+                \oOpt{-open_source_notice}
+                \oOptoArg{-copyright }{copyright}
+                \oOptArg{-base_filename }{base_filename}
+                \oOpt{-no_copy_ctor}
+                \oOpt{-no_assignment_operator}
+                \oOpt{-no_ctor}
+                \oOpt{-no_dtor}
+                \oOpt{-public_copy_ctor}
+                \oOpt{-public_assignment_operator}
+                \oOpt{-no_dump_diagnostics}
+                \oOpt{-no_check_valid}
+                \oOpt{-no_icc}
+                \oOptArg{-settings_file }{filename}
+
+\section{Description}
+%%%%%%%%%%%%%%%%%%%%%
+\Prog{fcc} takes the name of one or more classes and generates the
+  appropriate code and header files for those classes.  By default, it
+  includes a constructor, destructor, private copy constructor, private
+  assignment operator, unit testing, and appropriate inlines.  It also
+  generates a raw BSD-style makefile.
+
+\section{Options}
+%%%%%%%%%%%%%%%%%
+\begin{Description}
+\item[\OptArg{-class }{list of class names}] Names of classes to be
+  generated.  The files will be named after the first class name on the
+  list.  Class names must be separated by whitespace.
+
+\item[\OptArg{-author }{author's name}] Your name here.
+
+\item[\OptArg{-namespace }{namespace name}] Wrap the output in a
+  specified namespace.
+
+\item[\Opt{-verbose}] Explain in excruciating detail what the program
+  is doing.
+
+\item[\Opt{-no_unit_test}] Do not generate unit-testing definitions in
+  the source files.  This is an empty method; it's up to the user to
+  define appropriate tests.
+
+\item[\Opt{-no_makefile}] Do not generate a makefile for this code.
+
+\item[\OptArg{-project }{project_name}] Define a project for this makefile.  Right now
+  this option does nothing.
+
+\item[\Opt{-sccs_keywords}] Generate IDs appropriate to SCCS.  
+
+\item[\Opt{-continuus_keywords}] Generate keywords for the Continuus
+  Version System.
+
+\item[\Opt{-open_source_notice}] Add some comments about how this code
+  is open source and permission to copy in granted yadda yadda...
+
+\item[\OptoArg{-copyright }{copyright}] Adds your copyright notice to the
+  code.  
+
+\item[\OptArg{-base_filename }{base_filename}] Set the name of the
+  files output.  Defaults to first class name listed if not set.
+
+\item[\Opt{-no_copy_ctor}] Do not provide a copy constructor in the
+  output code.
+
+\item[\Opt{-no_assignment_operator}] Do not provide an assignment
+  operator in the output code.
+
+\item[\Opt{-no_ctor}] Do not provide a default constructor in the
+  output code.
+
+\item[\Opt{-no_dtor}] Do not provide a destructor in the output code.
+
+\item[\Opt{-public_copy_ctor}] Put the copy constructor in the public
+  section instead of the private section.
+
+\item[\Opt{-public_assignment_operator}] Put the assignment operator in
+  the public section instead of the private section.
+
+\item[\Opt{-no_dump_diagnostics}] Do not provide a debugging method.
+
+\item[\Opt{-no_check_valid}] Do not provide a Programming By Contract
+  style method to check for invariants.
+
+\item[\Opt{-no_icc}] Do not provide a file for class inlines.
+
+\item[\OptArg{-settings_file }{filename}] Get options from a settings
+  file.  Right now this option does nothing.
+
+\section{Requirements}
+%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{description}\setlength{\itemsep}{1cm}
+\item[Python] \Prog{fcc} requires Python version $>=$ 2.0
+\end{description}
+
+\section{Version}
+%%%%%%%%%%%%%%%%%
+Version: 0.8a of May 5, 2001
+
+\section{License and Copyright}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{description}
+\item[Copyright] \copyright\ 2001, Elf M. Sternberg \\
+        \Email{elf.sternberg@gmail.com}  \\
+        \URL{http://elfsternberg.com}
+
+\item[License] This program can be redistributed and/or modified under the
+  terms of the GNU Public License.  See the file COPYING or visit
+  \URL{http://www.gnu.org/copyleft/gpl.html} for terms of use and
+  distribution.
+
+\item[Misc] If you find this software useful, please drop me some email
+
+\item[Misc] This man page was generated using latex2man by Dr. Jurgen
+Vollmer, and is available from the CTAN archives.
+\end{description}
+
+\section{Author}
+%%%%%%%%%%%%%%%%
+
+\noindent
+Elf M. Sternberg                      \\
+Email: \Email{elf.sternberg@gmail.com}        \\
+WWW: \URL{http://elfsternberg.com}.
+\LatexManEnd
+\end{document}
