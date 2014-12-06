@@ -28,93 +28,43 @@
 \section{Synopsis}
 %%%%%%%%%%%%%%%%%%
 
-\Prog{fcc} \OptArg{-class }{list of class names}
-                \oOpt{-overwrite}
-                \oOptArg{-settings_file }{filename}
+\Prog{mp\_suggest} \OptArg{-g --genre}{Set the genre externally}
+           \OptArg{-p --artist}{Set the artist externally}
+           \OptArg{-a --album}{Set the album externally}
+           \Opt{-n --usedir}{Use the album name found in the directory}
+           \Opt{-n --usefilename}{Use the fine name to set the title}
+           \Opt{-h --help}{This help message}
+           \Opt{-v --version}{Version information}
 
 \section{Description}
 %%%%%%%%%%%%%%%%%%%%%
-\Prog{fcc} takes the name of one or more classes and generates the
-  appropriate code and header files for those classes.  By default, it
-  includes a constructor, destructor, private copy constructor, private
-  assignment operator, unit testing, and appropriate inlines.  It also
-  generates a raw BSD-style makefile.
 
-\section{Options}
-%%%%%%%%%%%%%%%%%
-\begin{Description}
-\item[\OptArg{-class }{list of class names}] Names of classes to be
-  generated.  The files will be named after the first class name on the
-  list.  Class names must be separated by whitespace.
+\Prog{mp\_suggest} works on a directory of MP3 files and attempts to
+determine the album name, artist name, genre, title, and album order
+from various clue: the content of ID3 files, the sort order, and the
+name of the directory.  It assumes that your MP3 filenames vaguely
+resemble the names of the songs, that they're organized with track
+number prefixes, and ideally that the directory is in ``Artist Name -
+Album Name'' format.
 
-\item[\OptArg{-author }{author's name}] Your name here.
-
-\item[\OptArg{-namespace }{namespace name}] Wrap the output in a
-  specified namespace.
-
-\item[\Opt{-verbose}] Explain in excruciating detail what the program
-  is doing.
-
-\item[\Opt{-no_unit_test}] Do not generate unit-testing definitions in
-  the source files.  This is an empty method; it's up to the user to
-  define appropriate tests.
-
-\item[\Opt{-no_makefile}] Do not generate a makefile for this code.
-
-\item[\OptArg{-project }{project_name}] Define a project for this makefile.  Right now
-  this option does nothing.
-
-\item[\Opt{-sccs_keywords}] Generate IDs appropriate to SCCS.  
-
-\item[\Opt{-continuus_keywords}] Generate keywords for the Continuus
-  Version System.
-
-\item[\Opt{-open_source_notice}] Add some comments about how this code
-  is open source and permission to copy in granted yadda yadda...
-
-\item[\OptoArg{-copyright }{copyright}] Adds your copyright notice to the
-  code.  
-
-\item[\OptArg{-base_filename }{base_filename}] Set the name of the
-  files output.  Defaults to first class name listed if not set.
-
-\item[\Opt{-no_copy_ctor}] Do not provide a copy constructor in the
-  output code.
-
-\item[\Opt{-no_assignment_operator}] Do not provide an assignment
-  operator in the output code.
-
-\item[\Opt{-no_ctor}] Do not provide a default constructor in the
-  output code.
-
-\item[\Opt{-no_dtor}] Do not provide a destructor in the output code.
-
-\item[\Opt{-public_copy_ctor}] Put the copy constructor in the public
-  section instead of the private section.
-
-\item[\Opt{-public_assignment_operator}] Put the assignment operator in
-  the public section instead of the private section.
-
-\item[\Opt{-no_dump_diagnostics}] Do not provide a debugging method.
-
-\item[\Opt{-no_check_valid}] Do not provide a Programming By Contract
-  style method to check for invariants.
-
-\item[\Opt{-no_icc}] Do not provide a file for class inlines.
-
-\item[\OptArg{-settings_file }{filename}] Get options from a settings
-  file.  Right now this option does nothing.
+It then generates a shell script suitable to piping into bash to change
+the details of all the MP3 files to match your specifications.  The
+commands can be tweaked, and all of them override the techniques
+\Prog{mp\_suggest} uses to derive information.
 
 \section{Requirements}
 %%%%%%%%%%%%%%%%%%%%%%
 
 \begin{description}\setlength{\itemsep}{1cm}
-\item[Python] \Prog{fcc} requires Python version $>=$ 2.0
+\item[Hy] \Prog{mp\_suggest} requires Hy version $>=$ 0.10.0, as well as
+  a local install of bothe eyeD3 and django.  I'll try to get these
+  fixed eventually.
+
 \end{description}
 
 \section{Version}
 %%%%%%%%%%%%%%%%%
-Version: 0.8a of May 5, 2001
+Version: 0.0.1 of December 6, 2014
 
 \section{License and Copyright}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -130,9 +80,6 @@ Version: 0.8a of May 5, 2001
   distribution.
 
 \item[Misc] If you find this software useful, please drop me some email
-
-\item[Misc] This man page was generated using latex2man by Dr. Jurgen
-Vollmer, and is available from the CTAN archives.
 \end{description}
 
 \section{Author}
