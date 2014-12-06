@@ -1,20 +1,27 @@
 \documentclass[english]{article}
 \usepackage[latin1]{inputenc}
 \usepackage{babel}
+\usepackage{verbatim}
 
+%% do we have the `hyperref package?
+\IfFileExists{hyperref.sty}{
+   \usepackage[bookmarksopen,bookmarksnumbered]{hyperref}
+}{}
+
+%% do we have the `fancyhdr' package?
 \IfFileExists{fancyhdr.sty}{
-\usepackage[fancyhdr,pdf]{latex2man}
+\usepackage[fancyhdr]{latex2man}
 }{
-
+%% do we have the `fancyheadings' package?
 \IfFileExists{fancyheadings.sty}{
-\usepackage[fancy,pdf]{latex2man}
+\usepackage[fancy]{latex2man}
 }{
-\usepackage[nofancy,pdf]{latex2man}
+\usepackage[nofancy]{latex2man}
 \message{no fancyhdr or fancyheadings package present, discard it}
 }}
 
-\setVersionWord{Version:}
-\setVersion{0.1a}
+\setVersionWord{Version:}  %%% that's the default, no need to set it.
+\setVersion{0.0.1}
 
 \begin{document}
 
@@ -28,13 +35,13 @@
 \section{Synopsis}
 %%%%%%%%%%%%%%%%%%
 
-\Prog{mp\_suggest} \OptArg{-g --genre}{Set the genre externally}
-           \OptArg{-p --artist}{Set the artist externally}
-           \OptArg{-a --album}{Set the album externally}
-           \Opt{-n --usedir}{Use the album name found in the directory}
-           \Opt{-n --usefilename}{Use the fine name to set the title}
-           \Opt{-h --help}{This help message}
-           \Opt{-v --version}{Version information}
+\Prog{mp\_suggest} \oOptArg{-g}{genre}
+                 \oOptArg{-r}{artist}
+                 \oOptArg{-a}{album}
+                 \oOpt{-d}
+                 \oOpt{-n}
+                 \oOpt{-h}
+                 \oOpt{-v}
 
 \section{Description}
 %%%%%%%%%%%%%%%%%%%%%
@@ -57,7 +64,7 @@ commands can be tweaked, and all of them override the techniques
 
 \begin{description}\setlength{\itemsep}{1cm}
 \item[Hy] \Prog{mp\_suggest} requires Hy version $>=$ 0.10.0, as well as
-  a local install of bothe eyeD3 and django.  I'll try to get these
+  a local install of both eyeD3 and django.  I'll try to get these
   fixed eventually.
 
 \end{description}

@@ -4,13 +4,19 @@ FILES = AUTHORS COPYING INSTALL README TODO \
 TARFILES = ${FILES} mp_suggest_man.html mp_suggest.1 mp_suggest.man
 
 mp_suggest_man.html: mp_suggest_man.tex
-	latex2man -H mp_suggest_man.tex mp_suggest_man.html
+	latex2man -H $< $@
 
 mp_suggest.1: mp_suggest_man.tex
-	latex2man mp_suggest_man.tex mp_suggest.1
+	latex2man $< $@
 
 mp_suggest.man: mp_suggest.1
-	nroff -Tascii -man mp_suggest.1 > mp_suggest.man
+	nroff -Tascii -man $< > $@
+
+mp_suggest_man.pdf: mp_suggest_man.tex
+	xelatex $<
+
+clean:
+	rm mp_suggest.man mp_suggest.1 mp_suggest_man.log mp_suggest_man.out mp_suggest_man.aux mp_suggest_man.pdf
 
 all: ${TARFILES}
 
