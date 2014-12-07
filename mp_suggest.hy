@@ -7,6 +7,8 @@
         [collections [defaultdict]]
         [django.utils.encoding [smart_str]])
 
+; 0: Short opt, 1: long opt, 2: takes argument, 3: help text
+
 (def optlist [["g" "genre" true "Set the genre"] 
               ["a" "album" true "Set the album"] 
               ["r" "artist" true "Set the artist"] 
@@ -41,6 +43,13 @@
                         (long-opt-assoc it)) optlist {})]]
     (fn [acc it] (do (assoc acc (get fullset (get it 0)) (get it 1)) acc))))
 
+; Auto-capitalize "found" entries like album name and title. Will not
+; affect manually set entries.
+
+(defn sfix [s]
+  (let [[seq (.split (.strip s))]]
+    (smart_str (string.join (ap-map (.capitalize it) seq) " "))))
+
 ; Assuming the directory name looked like "Artist - Album", return the
 ; two names separately.  If only one name is here, assume a compilation
 ; or mixtape album and default to "VA" (Various Artists).
@@ -62,22 +71,28 @@
        (.strip)
        (.sub re "^.* - " "")
        (.sub re "^[\d\. ]+" "")
-       (.sub re ".* \d{2} " "")))
+       (.sub re ".* \d{2} " "")
+       (.sub re "^\W+" "")
+       (sfix)))
 
 ; Given a list of mp3s, derive the list of ID3 tags.  Obviously,
 ; filesystem access is a point of failure, but this is mostly
 ; reliable.
 
-(defn tag-deriver [usefilenames]
+(defn tag-deriver [usefilenames forceartist setartist]
+  (defn choose-title [filename title]
+    (if usefilenames (title-strategy filename) title))
+  (defn choose-artist [artist]
+    (if forceartist setartist artist))
   (fn [mp3s]
     (defn derive-tag [pos mp3]
       (try
        (let [[tag (.Tag eyeD3)]]
          (tag.link mp3)
          (, mp3 (str (.getArtist tag)) (str (.getAlbum tag)) 
-                (str (.getGenre tag)) (str (.getTitle tag)) pos))
-       (catch [err]
-         (, mp3 "" "" "" ""))))
+                (str (.getGenre tag)) (choose-title mp3 (str (.getTitle tag))) pos))
+       (catch [err Exception]
+         (, mp3 "" "" "" "" 1))))
     (ap-map (apply derive-tag it)  mp3s)))
 
 ; For removing subgenre parentheses.  This is why there's the -g option.
@@ -109,26 +124,24 @@
           (sorted)
           (reversed)
           (list))]]
-    (if (= (len cts) 0) 
+    (if (zero? (len cts)) 
       ""
       (get (get cts 0) 1))))
 
-; Auto-capitalize "found" entries like album name and title. Will not
-; affect manually set entries.
-
-(defn sfix [s]
-  (let [[seq (.split (.strip s))]]
-    (smart_str (string.join (ap-map (.capitalize it) seq) " "))))
-
 (defn suggest [opts]
-  (let [[mp3s 
+  (let [[(, loc_artist loc_album) (artist-album)]
+
+        [artist 
+         (cond [(.has_key opts "artist") (get opts "artist")]
+               [true (sfix loc_artist)])]
+
+        [mp3s 
          (->> (os.listdir ".") 
               (ap-filter (and (> (len it) 4) (= (slice (.lower it) -4) ".mp3")))
               (sorted)
               (enumerate)
-              ((tag-deriver true))
+              ((tag-deriver (.has_key opts "usefilename") (.has_key opts "artist") artist))
               (list))]
-        [(, loc_artist loc_album) (artist-album)]
 
         [genre 
          (if (.has_key opts "genre") 
@@ -146,11 +159,6 @@
           [(not (= "" pos_album)) pos_album]
           [true (sfix loc_album)])]
         
-        [artist 
-         (if (.has_key opts "artist")
-           (get opts "artist")
-           (sfix loc_artist))]
-
         [format-string 
          (string.join ["id3v2 -T \"{}\""	
                        "--album \"{}\""	
@@ -160,7 +168,13 @@
                        "\"{}\""] "	")]]
     
     (ap-each mp3s 
-             (print (.format format-string (get it 5) album artist genre (get it 4) (get it 0))))))
+             (print (.format format-string 
+                             (get it 5) 
+                             album 
+                             (if (get it 1) (get it 1) (sfix loc_artist)) 
+                             genre 
+                             (get it 4) 
+                             (get it 0))))))
 
 (defmain [&rest args]
   (try
