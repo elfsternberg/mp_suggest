@@ -17,35 +17,39 @@
 
 (defn print-version []
   (print (.format "mp_suggest (hy version {})" *version*))
-  (sys.exit 0))
+  (print "Copyright (c) 2008, 2014 Elf M. Sternberg <elf.sternberg@gmail.com>")
+  (sys.exit))
 
 (defn print-help []
   (print "Usage:")
   (ap-each optlist (print (.format "	-{}	--{}	{}" (get it 0) (get it 1) (get it 3))))
-  (sys.exit 0))
+  (sys.exit))
 
 ; Given a set of command-line arguments, compare that to a mapped
 ; version of the optlist and return a canonicalized dictionary of all
 ; the arguments that have been set.
 
-(defn find-opt-reducer [acc it]
-  (let [[(, o a) it]
-        [optmap (ap-reduce (do (assoc acc (+ "-" (. it [0])) (. it [1])) acc) optlist {})]]
-    (if (.has_key optmap o) (let [[full (car (get optmap o))]
-                            [hasargs (car (cdr (get optmap o)))]]
-                        (assoc acc full (if hasargs a true))))
-    acc))
+(defn make-opt-assoc [prefix pos]
+  (fn [acc it] (assoc acc (+ prefix (get it pos)) (get it 1)) acc)) 
+
+(defn make-options-rationalizer [optlist]
+  (let [
+        [short-opt-assoc (make-opt-assoc "-" 0)]
+        [long-opt-assoc (make-opt-assoc "--" 1)]
+        [fullset 
+         (ap-reduce (-> (short-opt-assoc acc it)
+                        (long-opt-assoc it)) optlist {})]]
+    (fn [acc it] (do (assoc acc (get fullset (get it 0)) (get it 1)) acc))))
 
 ; Assuming the directory name looked like "Artist - Album", return the
 ; two names separately.  If only one name is here, assume a compilation
 ; or mixtape album and default to "VA" (Various Artists).
 
 (defn artist-album []
-  (let [[aa (.split (. (.split (.getcwd os) "/") [-1]) " - ")]
-        [sp (fn [i] (.strip i))]]
+  (let [[aa (-> (.getcwd os) (.split "/") (get -1) (.split " - "))]]
     (if (= (len aa) 1) 
       (, "VA" (get aa 0)) 
-      (, (sp (get aa 0)) (sp (get aa 1))))))
+      (, (.strip (get aa 0)) (.strip (get aa 1))))))
 
 ; A long list of substitutions intended to turn a filename into a
 ; human-readable strategy.  This operation is the result of weeks
@@ -63,7 +67,6 @@
 ; Given a list of mp3s, derive the list of ID3 tags.  Obviously,
 ; filesystem access is a point of failure, but this is mostly
 ; reliable.
-
 
 (defn tag-deriver [usefilenames]
   (fn [mp3s]
@@ -146,23 +149,39 @@
         [artist 
          (if (.has_key opts "artist")
            (get opts "artist")
-           (sfix loc_artist))]]
+           (sfix loc_artist))]
+
+        [format-string 
+         (string.join ["id3v2 -T \"{}\""	
+                       "--album \"{}\""	
+                       "--artist \"{}\""
+                       "--genre \"{}\""
+                       "--song \"{}\""
+                       "\"{}\""] "	")]]
     
-    (print genre album artist)))
+    (ap-each mp3s 
+             (print (.format format-string (get it 5) album artist genre (get it 4) (get it 0))))))
 
 (defmain [&rest args]
   (try
    (let [[optstringsshort 
-          (string.join (ap-map (. it [0]) optlist) ":")]
+          (string.join (ap-map (+ (. it [0]) (cond [(. it [2]) ":"] [true ""])) optlist) "")]
+
          [optstringslong 
           (list (ap-map (+ (. it [1]) (cond [(. it [2]) "="] [true ""])) optlist))]
+
          [(, opt arg) 
           (getopt.getopt (slice args 1) optstringsshort optstringslong)]
+
+         [rationalize-options 
+          (make-options-rationalizer optlist)]
+
          [options 
-          (ap-reduce (find-opt-reducer acc it) opt {})]]
-         (cond [(.has_key options "h") (print-help)]
-               [(.has_key options "v") (print-version)]
-               [true (suggest options)]))))
+          (ap-reduce (rationalize-options acc it) opt {})]]
+
+     (cond [(.has_key options "help") (print-help)]
+           [(.has_key options "version") (print-version)]
+           [true (suggest options)]))))
 
 
 

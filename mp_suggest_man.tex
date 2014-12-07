@@ -62,6 +62,35 @@ commands can be tweaked, and all of them override the techniques
 This is probably completely idiosyncratic to the way I do things in my
 own music archive, but as an exercise in writing Hy, it was fun.
 
+\section{Options}
+%%%%%%%%%%%%%%%%%
+\begin{Description}
+\item[\OptArg{--genre}{genre}] Set the genre manually from the command
+  line.  This overrides any settings found in the ID3 tag.  A short form
+  of this tag is ``-g''
+
+\item[\OptArg{--album}{album}] Set the album manually from the command
+  line.  This overrides any settings found in the ID3 tag.  A short form
+  of this tag is ``-a''
+
+\item[\OptArg{--artist}{artist}] Set the artist manually from the command
+  line.  This overrides any settings found in the ID3 tag.  A short form
+  of this tag is ``-r''
+
+\item[\Opt{--usedir}] Use the directory name for artist and album
+  information.  This overrides anything found in the ID3 tags.  A short
+  form of this tag is ``-n''.
+
+\item[\Opt{--usefilename}] Use the filename as the song title.  This
+  overrides anything found in the ID3 tags.  A short form of this tag is
+  ``-t''.
+
+\item[\Opt{--help}] Print a short help message.  A short form of this
+  tag is ``-h''
+
+\item[\Opt{--version}] Print the version information.  A short form of this
+  tag is ``-v''
+
 \section{Requirements}
 %%%%%%%%%%%%%%%%%%%%%%
 
