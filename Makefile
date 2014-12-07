@@ -16,7 +16,7 @@ mp_suggest_man.pdf: mp_suggest_man.tex
 	xelatex $<
 
 clean:
-	rm mp_suggest.man mp_suggest.1 mp_suggest_man.log mp_suggest_man.out mp_suggest_man.aux mp_suggest_man.pdf
+	rm -f mp_suggest.man mp_suggest.1 mp_suggest_man.log mp_suggest_man.out mp_suggest_man.aux mp_suggest_man.pdf
 
 all: ${TARFILES}
 
