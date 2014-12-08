@@ -1,6 +1,6 @@
 #!/usr/local/bin/hy
 
-(def *version* "0.0.1")
+(def *version* "0.0.2")
 
 (require hy.contrib.anaphoric)
 (import eyeD3 os re sys getopt string
@@ -29,7 +29,8 @@
 
 ; Given a set of command-line arguments, compare that to a mapped
 ; version of the optlist and return a canonicalized dictionary of all
-; the arguments that have been set.
+; the arguments that have been set.  For example "-g" and "--genre"
+; will both be mapped to "genre".
 
 (defn make-opt-assoc [prefix pos]
   (fn [acc it] (assoc acc (+ prefix (get it pos)) (get it 1)) acc)) 
@@ -50,16 +51,6 @@
   (let [[seq (.split (.strip s))]]
     (smart_str (string.join (ap-map (.capitalize it) seq) " "))))
 
-; Assuming the directory name looked like "Artist - Album", return the
-; two names separately.  If only one name is here, assume a compilation
-; or mixtape album and default to "VA" (Various Artists).
-
-(defn artist-album []
-  (let [[aa (-> (.getcwd os) (.split "/") (get -1) (.split " - "))]]
-    (if (= (len aa) 1) 
-      (, "VA" (get aa 0)) 
-      (, (.strip (get aa 0)) (.strip (get aa 1))))))
-
 ; A long list of substitutions intended to turn a filename into a
 ; human-readable strategy.  This operation is the result of weeks
 ; of experimentation.  Doubt it at your peril!  :-)
@@ -75,27 +66,9 @@
        (.sub re "^\W+" "")
        (sfix)))
 
-; Given a list of mp3s, derive the list of ID3 tags.  Obviously,
-; filesystem access is a point of failure, but this is mostly
-; reliable.
-
-(defn tag-deriver [usefilenames forceartist setartist]
-  (defn choose-title [filename title]
-    (if usefilenames (title-strategy filename) title))
-  (defn choose-artist [artist]
-    (if forceartist setartist artist))
-  (fn [mp3s]
-    (defn derive-tag [pos mp3]
-      (try
-       (let [[tag (.Tag eyeD3)]]
-         (tag.link mp3)
-         (, mp3 (str (.getArtist tag)) (str (.getAlbum tag)) 
-                (str (.getGenre tag)) (choose-title mp3 (str (.getTitle tag))) pos))
-       (catch [err Exception]
-         (, mp3 "" "" "" "" 1))))
-    (ap-map (apply derive-tag it)  mp3s)))
-
-; For removing subgenre parentheses.  This is why there's the -g option.
+; For removing subgenre parentheses.  This is why there's the -g
+; option.  Parenthetical sub-genre "commentary" are a pre ID3v2
+; abomination.
 
 (defn clean-paren [s] 
   (if (not (= (.find s "(") -1))
@@ -103,13 +76,89 @@
     s))
 
 ; My FAT-32 based file store via Samba isn't happy with unicode, so
-; this is here...
+; this is here.  I had the weirdest time with non-unicode album names,
+; especially when trying to load them onto my old iPod classic.
 
 (defn is-ascii [s] 
   (= (.decode (.encode s "ascii" "ignore") "ascii") s))
 
 (defn ascii-or-nothing [s]
   (if (is-ascii s) s ""))
+
+; Assuming the directory name looked like "Artist - Album", return the
+; two names separately.  If only one name is here, assume a compilation
+; or mixtape album and default to "VA" (Various Artists).
+
+(defn artist-album []
+  (let [[aa (-> (.getcwd os) (.split "/") (get -1) (.split " - "))]]
+    (if (= (len aa) 1) 
+      (, "VA" (sfix (get aa 0)))
+      (, (sfix (.strip (get aa 0))) (sfix (.strip (get aa 1)))))))
+
+; Priorities:
+;
+;     Artist:
+;         (1) Command Line
+;         (2) Command Line UseDir
+;         (3) In Existing Tag
+;         (4) Found Dir
+;
+;     Album: 
+;         (1) Command line 
+;         (2) Command Line UseDir 
+;         (3) Found-Likely 
+;         (4) Found Dir
+;
+;     Genre:
+;         (1) Command Line
+;         (2) Found-Likely
+;
+;     Title:
+;         (1) Command Line UseDir
+;         (1) In Existing Tag
+;         (2) Derived From Filename
+
+(defn make-artist-deriver [opts found likely]
+  (cond [(.has_key opts "artist") (fn [tag file] (get opts "artist"))]
+        [(.has_key opts "usedir") (fn [tag file] found)]
+        [true (fn [tag file] (or tag (sfix found) (sfix likely)))]))
+
+(defn make-album-deriver [opts found likely]
+  (cond [(.has_key opts "album") (fn [tag file] (get opts "album"))]
+        [(.has_key opts "usedir") (fn [tag file] found)]
+        [true (fn [tag file] (or (ascii-or-nothing likely) (sfix found)))]))
+
+(defn make-genre-deriver [opts found likely]
+  (cond [(.has_key opts "genre") (fn [tag file] (get opts "genre"))]
+        [true (fn [tag file] likely)]))
+
+(defn make-title-deriver [opts found likely]
+  (cond [(.has_key opts "usefilename") (fn [tag file] (title-strategy file))]
+        [true (fn [tag file] (or tag (title-strategy file)))]))
+
+
+; Given a list of mp3s, derive the list of ID3 tags.  Obviously,
+; filesystem access is a point of failure, but this is mostly
+; reliable.
+
+(defn fetch-tags [mp3s]
+  (defn fetch-tag [pos mp3]
+    (try
+     (let [[tag (.Tag eyeD3)]]
+       (tag.link mp3)
+       (, mp3 (str (.getArtist tag)) (str (.getAlbum tag))
+              (str (.getGenre tag)) (str (.getTitle tag)) pos))
+     (catch [err Exception]
+       (, mp3 "" "" "" "" 1))))
+  (ap-map (apply fetch-tag it) mp3s))
+
+
+(defn derive-tags [mp3s artist-deriver album-deriver genre-deriver title-deriver]
+  (defn derive-tag [mp3]
+    (let [[file (get mp3 0)]]
+      (, (get mp3 0) (artist-deriver (get mp3 1) file) (album-deriver (get mp3 2) file)
+         (genre-deriver (get mp3 3) file) (title-deriver (get mp3 4) file) (get mp3 5))))
+  (ap-map (derive-tag it) mp3s))
 
 ; For all the songs, analyze a consist entry (usually genre and album
 ; names), and return the one with the most votes.
@@ -129,51 +178,43 @@
       (get (get cts 0) 1))))
 
 (defn suggest [opts]
-  (let [[(, loc_artist loc_album) (artist-album)]
-
-        [artist 
-         (cond [(.has_key opts "artist") (get opts "artist")]
-               [true (sfix loc_artist)])]
+  (let [[(, local-artist local-album) (artist-album)]
 
         [mp3s 
          (->> (os.listdir ".") 
               (ap-filter (and (> (len it) 4) (= (slice (.lower it) -4) ".mp3")))
               (sorted)
               (enumerate)
-              ((tag-deriver (.has_key opts "usefilename") (.has_key opts "artist") artist))
-              (list))]
+              (fetch-tags)
+              (list)
+              )]
 
-        [genre 
-         (if (.has_key opts "genre") 
-           (get opts "genre") 
-           (clean-paren (find-likely (map (fn [m] (get m 3)) mp3s))))]
+        [likely-genre (sfix (clean-paren (find-likely (map (fn [m] (get m 3)) mp3s))))]
+        [likely-album (sfix (find-likely (map (fn [m] (get m 2)) mp3s)))]
+        [likely-artist (sfix (find-likely (map (fn [m] (get m 1)) mp3s)))]
 
-        [pos_album 
-         (ascii-or-nothing 
-          (find-likely 
-           (map (fn [m] (get m 2)) mp3s)))]
+        [artist-deriver (make-artist-deriver opts local-artist likely-artist)]
+        [album-deriver (make-album-deriver opts local-album likely-album)]
+        [genre-deriver (make-genre-deriver opts "" likely-genre)]
+        [title-deriver (make-title-deriver opts "" "")]
 
-        [album 
-         (cond 
-          [(.has_key opts "album") (get opts "album")]
-          [(not (= "" pos_album)) pos_album]
-          [true (sfix loc_album)])]
+        [newmp3s (derive-tags mp3s artist-deriver album-deriver genre-deriver title-deriver)]
         
         [format-string 
          (string.join ["id3v2 -T \"{}\""	
-                       "--album \"{}\""	
                        "--artist \"{}\""
+                       "--album \"{}\""	
                        "--genre \"{}\""
                        "--song \"{}\""
                        "\"{}\""] "	")]]
     
-    (ap-each mp3s 
+    (ap-each newmp3s 
              (print (.format format-string 
-                             (get it 5) 
-                             album 
-                             (if (get it 1) (get it 1) (sfix loc_artist)) 
-                             genre 
-                             (get it 4) 
+                             (get it 5)
+                             (get it 1) 
+                             (get it 2)
+                             (get it 3)
+                             (get it 4)
                              (get it 0))))))
 
 (defmain [&rest args]
@@ -195,11 +236,7 @@
 
      (cond [(.has_key options "help") (print-help)]
            [(.has_key options "version") (print-version)]
-           [true (suggest options)]))))
-
-
-
-
-  
-
-
+           [true (suggest options)]))
+   (catch [err Exception]
+     (print (str err))
+     (print-help))))
