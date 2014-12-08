@@ -99,13 +99,13 @@
 ;
 ;     Artist:
 ;         (1) Command Line
-;         (2) Command Line UseDir
+;         (2) Command Line Force-Use-Dir
 ;         (3) In Existing Tag
 ;         (4) Found Dir
 ;
 ;     Album: 
 ;         (1) Command line 
-;         (2) Command Line UseDir 
+;         (2) Command Line Force-Use-Dir
 ;         (3) Found-Likely 
 ;         (4) Found Dir
 ;
@@ -114,9 +114,9 @@
 ;         (2) Found-Likely
 ;
 ;     Title:
-;         (1) Command Line UseDir
-;         (1) In Existing Tag
-;         (2) Derived From Filename
+;         (1) Command Line Force-Use-Filename
+;         (2) In Existing Tag
+;         (3) Derived From Filename
 
 (defn make-artist-deriver [opts found likely]
   (cond [(.has_key opts "artist") (fn [tag file] (get opts "artist"))]
