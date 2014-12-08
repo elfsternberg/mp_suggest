@@ -156,8 +156,8 @@
 (defn derive-tags [mp3s artist-deriver album-deriver genre-deriver title-deriver]
   (defn derive-tag [mp3]
     (let [[file (get mp3 0)]]
-      (, (get mp3 0) (artist-deriver (get mp3 1) file) (album-deriver (get mp3 2) file)
-         (genre-deriver (get mp3 3) file) (title-deriver (get mp3 4) file) (get mp3 5))))
+      (, (get mp3 5) (artist-deriver (get mp3 1) file) (album-deriver (get mp3 2) file)
+         (genre-deriver (get mp3 3) file) (title-deriver (get mp3 4) file) (get mp3 0))))
   (ap-map (derive-tag it) mp3s))
 
 ; For all the songs, analyze a consist entry (usually genre and album
@@ -197,7 +197,7 @@
         [album-deriver (make-album-deriver opts local-album likely-album)]
         [genre-deriver (make-genre-deriver opts "" likely-genre)]
         [title-deriver (make-title-deriver opts "" "")]
-
+    
         [newmp3s (derive-tags mp3s artist-deriver album-deriver genre-deriver title-deriver)]
         
         [format-string 
@@ -207,15 +207,15 @@
                        "--genre \"{}\""
                        "--song \"{}\""
                        "\"{}\""] "	")]]
-    
+
     (ap-each newmp3s 
-             (print (.format format-string 
-                             (get it 5)
+             (print (.format format-string
+                             (get it 0)
                              (get it 1) 
                              (get it 2)
                              (get it 3)
                              (get it 4)
-                             (get it 0))))))
+                             (get it 5))))))
 
 (defmain [&rest args]
   (try
