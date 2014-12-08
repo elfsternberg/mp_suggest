@@ -1,8 +1,8 @@
-This is a distribution of mp_suggest, an organization tool for MP3
-libraries.  It was written primarily as an experiment in learning Hy.
-Hy is a lisp-like programming language that runs on top of the Python VM
-and exploits Python's access to the running AST in order to build
-working Python programs.
+<kbd>mp_suggest</kbd> is a simple little organizational tool for MP3
+collections.  I wrote it a few years ago to help me organize my own
+collection, and when the Hy Programming Language came out, I decided it
+was time for a minor exercise.  Rewriting mp\_suggest in Hy was a
+perfect opportunity.
 
 Writing mp_suggest was an interesting exercise in returning to Lisp
 after all these years.  I find that I really enjoyed it (although,
@@ -19,7 +19,7 @@ influenced the design decisions I made in mp_suggest.
 * Licensing
 
   This program is released under the terms of the GNU General Public
-  License (GNU GPL).  
+  License (GNU GPL).
 
   You can find a copy of the license in the file COPYING.
 
