@@ -192,8 +192,8 @@
               )]
 
         [likely-genre (sfix (clean-paren (find-likely (map (fn [m] (get m 3)) mp3s))))]
-        [likely-album (sfix (find-likely (map (fn [m] (get m 2)) mp3s)))]
-        [likely-artist (sfix (find-likely (map (fn [m] (get m 1)) mp3s)))]
+        [likely-album (find-likely (map (fn [m] (get m 2)) mp3s))]
+        [likely-artist (find-likely (map (fn [m] (get m 1)) mp3s))]
 
         [artist-deriver (make-artist-deriver opts local-artist likely-artist)]
         [album-deriver (make-album-deriver opts local-album likely-album)]
