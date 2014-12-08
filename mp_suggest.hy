@@ -177,6 +177,8 @@
       ""
       (get (get cts 0) 1))))
 
+(defn tap [a] (print a) a)
+
 (defn suggest [opts]
   (let [[(, local-artist local-album) (artist-album)]
 
@@ -206,16 +208,12 @@
                        "--album \"{}\""	
                        "--genre \"{}\""
                        "--song \"{}\""
-                       "\"{}\""] "	")]]
+                       "\"{}\""] "	")]
+
+        [finalizer (fn (seq) (+ [format-string] (list (map (fn [i] (get seq i)) (xrange 0 6)))))]]
 
     (ap-each newmp3s 
-             (print (.format format-string
-                             (get it 0)
-                             (get it 1) 
-                             (get it 2)
-                             (get it 3)
-                             (get it 4)
-                             (get it 5))))))
+             (print (apply .format (finalizer it))))))
 
 (defmain [&rest args]
   (try
