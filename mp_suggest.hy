@@ -151,12 +151,12 @@
        (, filename "" "" "" "" 1))))
   (ap-map (apply fetch-tag it) filenames))
 
-(defn derive-tags [filenames artist-deriver album-deriver genre-deriver title-deriver]
-  (defn derive-tag [filename]
-    (let [[file (get filename 0)]]
-      (, (get filename 0) (artist-deriver (get filename 1) file) (album-deriver (get filename 2) file)
-         (genre-deriver (get filename 3) file) (title-deriver (get filename 4) file) (get filename 5))))
-  (ap-map (derive-tag it) filenames))
+(defn derive-tags [mp3s artist-deriver album-deriver genre-deriver title-deriver]
+  (defn derive-tag [mp3]
+    (let [[file (get mp3 5)]]
+      (, (get mp3 0) (artist-deriver (get mp3 1) file) (album-deriver (get mp3 2) file)
+         (genre-deriver (get mp3 3) file) (title-deriver (get mp3 4) file) (get mp3 5))))
+  (ap-map (derive-tag it) mp3s))
 
 ; For all the songs, analyze a consist entry (usually genre and album
 ; names), and return the one with the most votes.
@@ -233,6 +233,6 @@
      (cond [(.has_key options "help") (print-help)]
            [(.has_key options "version") (print-version)]
            [true (suggest options)]))
-   (catch [err Exception]
+   (catch [err getopt.GetoptError]
      (print (str err))
      (print-help))))
