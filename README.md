@@ -1,13 +1,13 @@
-<kbd>mp_suggest</kbd> is a simple little organizational tool for MP3
+<code>mp_suggest</code> is a simple little organizational tool for MP3
 collections.  I wrote it a few years ago to help me organize my own
 collection, and when the Hy Programming Language came out, I decided it
 was time for a minor exercise.  Rewriting mp\_suggest in Hy was a
 perfect opportunity.
 
-<kbd>mp\_suggest</kbd> does *not* alter your MP3 files; instead, it
+<code>mp\_suggest</code> does *not* alter your MP3 files; instead, it
 prints to stdout a simple Bash script that invokes the command-line
 program id3v2; you can capture that script and run it by hand, or pipe
-the output of <kbd>mp\_suggest</kbd> through <kbd>sed</kbd> to make
+the output of <code>mp\_suggest</code> through <code>sed</code> to make
 changes on the fly, or just run the output straight into Bash with a
 unix pipe.
 
