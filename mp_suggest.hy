@@ -136,29 +136,27 @@
   (cond [(.has_key opts "usefilename") (fn [tag file] (title-strategy file))]
         [true (fn [tag file] (or tag (title-strategy file)))]))
 
-
 ; Given a list of mp3s, derive the list of ID3 tags.  Obviously,
 ; filesystem access is a point of failure, but this is mostly
 ; reliable.
 
-(defn fetch-tags [mp3s]
-  (defn fetch-tag [pos mp3]
+(defn fetch-tags [filenames]
+  (defn fetch-tag [pos filename]
     (try
      (let [[tag (.Tag eyeD3)]]
-       (tag.link mp3)
-       (, mp3 (str (.getArtist tag)) (str (.getAlbum tag))
-              (str (.getGenre tag)) (str (.getTitle tag)) pos))
+       (tag.link filename)
+       (, pos (str (.getArtist tag)) (str (.getAlbum tag))
+              (str (.getGenre tag)) (str (.getTitle tag)) filename))
      (catch [err Exception]
-       (, mp3 "" "" "" "" 1))))
-  (ap-map (apply fetch-tag it) mp3s))
+       (, filename "" "" "" "" 1))))
+  (ap-map (apply fetch-tag it) filenames))
 
-
-(defn derive-tags [mp3s artist-deriver album-deriver genre-deriver title-deriver]
-  (defn derive-tag [mp3]
-    (let [[file (get mp3 0)]]
-      (, (get mp3 5) (artist-deriver (get mp3 1) file) (album-deriver (get mp3 2) file)
-         (genre-deriver (get mp3 3) file) (title-deriver (get mp3 4) file) (get mp3 0))))
-  (ap-map (derive-tag it) mp3s))
+(defn derive-tags [filenames artist-deriver album-deriver genre-deriver title-deriver]
+  (defn derive-tag [filename]
+    (let [[file (get filename 0)]]
+      (, (get filename 0) (artist-deriver (get filename 1) file) (album-deriver (get filename 2) file)
+         (genre-deriver (get filename 3) file) (title-deriver (get filename 4) file) (get filename 5))))
+  (ap-map (derive-tag it) filenames))
 
 ; For all the songs, analyze a consist entry (usually genre and album
 ; names), and return the one with the most votes.
