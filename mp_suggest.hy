@@ -117,6 +117,12 @@
 ;         (1) Command Line Force-Use-Filename
 ;         (2) In Existing Tag
 ;         (3) Derived From Filename
+;
+; The "found-likely" algorithm is straightforward: for a given
+; directory, find the album name or genre most commonly expressed in
+; the ID3 tags, and assign that to all the ID3 tags in the directory.
+; This will really mess you up if you accidentally have two albums in
+; the same directory; use with caution.
 
 (defn make-artist-deriver [opts found likely]
   (cond [(.has_key opts "artist") (fn [tag file] (get opts "artist"))]
