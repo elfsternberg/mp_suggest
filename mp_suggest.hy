@@ -151,7 +151,7 @@
     (try
      (let [[tag (.Tag eyeD3)]]
        (tag.link filename)
-       (, pos (str (.getArtist tag)) (str (.getAlbum tag))
+       (, (+ pos 1) (str (.getArtist tag)) (str (.getAlbum tag))
               (str (.getGenre tag)) (str (.getTitle tag)) filename))
      (catch [err Exception]
        (, filename "" "" "" "" 1))))
