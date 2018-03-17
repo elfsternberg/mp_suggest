@@ -1,1 +1,1 @@
-Analyzes a folder of MP3 files and suggests fixes for various ID3 fields.
+A simple utility to suggest ID3 tag changes for MP3 collections with a specific format
